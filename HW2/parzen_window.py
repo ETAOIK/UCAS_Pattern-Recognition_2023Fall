@@ -1,5 +1,5 @@
 # Pattern Recognition 2023 Fall
-# Chenkai GUO 202328017515010
+# Chenkai GUO 
 # Date: 2023.10.30
 
 import numpy as np
