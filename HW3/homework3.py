@@ -1,6 +1,6 @@
 # Pattern Recognition 2023 Fall
-# Chenkai GUO 202328017515010
-# Date: 2023.10.30
+# Chenkai GUO
+# Date: 2023.11.26
 
 import numpy as np
 import matplotlib.pyplot as plt
