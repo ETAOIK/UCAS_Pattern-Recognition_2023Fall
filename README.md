@@ -8,3 +8,4 @@ Homework for UCAS 2023Fall Pattern Recognition course
 | Parzen-window estimation, Expectation-Maximization(EM), Hidden Markov Model(HMM)               | HW-2            | 
 | Linear Discriminant Analysis, Batch Perception, Ho-Kashyap algorithm, MSE-expand               | HW-3            | 
 | Neural Network, Back Propagation algorithm(BP)                                                 | HW-4            |  
+| Feature Selection, Manifold Learning, PCA/LDA(with KNN)                                        | HW-5            |  
