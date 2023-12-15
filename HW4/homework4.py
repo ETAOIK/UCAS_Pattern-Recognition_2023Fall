@@ -2,6 +2,7 @@
 # Chenkai GUO
 # Date: 2023.12.10
 
+import time
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -66,7 +67,7 @@ def seed_all(seed):
     random.seed(seed)
 
 # visualize training process
-def Loss_viz(viz_list1, viz_list2, lr):
+def Loss_viz(viz_list1, viz_list2, lr, batch_size):
     epoch_list = list(range(1,num_epochs+1))
     model_list = ['model1 (h=3)', 'model2 (h=10)', 'model3 (h=25)', 'model4 (h=50)', 'model5 (h=100)']
 
@@ -87,8 +88,8 @@ def Loss_viz(viz_list1, viz_list2, lr):
     plt.legend(loc='upper right', labels=model_list)
     plt.title('Testset MSE error')
 
-    plt.suptitle('Training results of models with different hid_size (lr=' + str(lr) + ')')
-    img = 'Linear network training results(lr=' + str(lr) + ').png'
+    plt.suptitle('Training results of models with different hid_size (lr=' + str(lr) + ',batch_size=' + str(batch_size) + ')')
+    img = 'Linear network training results(lr=' + str(lr) + ',batch_size=' + str(batch_size) + ').png'
     plt.savefig(img)
     # plt.show()
 
@@ -179,6 +180,7 @@ train_loss_list = []
 test_loss_list = []
 viz_list1 = []
 viz_list2 = []
+batch_size = 4
 
 # Training model
 if __name__ == '__main__':
@@ -197,7 +199,7 @@ if __name__ == '__main__':
     test_data = torch.Tensor(testset[:, 0:3])
     test_labels = torch.Tensor(testset[:, 3]).reshape(-1, 1)
 
-    data_iter = dataloader(train_data, train_labels, batch_size=4)
+    data_iter = dataloader(train_data, train_labels, batch_size=batch_size)
 
     model1 = Linear_network(3, 3, 1)
     model2 = Linear_network(3, 10, 1)
@@ -207,6 +209,7 @@ if __name__ == '__main__':
     model_list = [model1, model2, model3, model4, model5]
 
     # Training models
+    start = time.time()
     for lr in lr_list:
         for model in model_list:
             model.apply(init_params)
@@ -233,9 +236,10 @@ if __name__ == '__main__':
 
         # print(np.array(viz_list1).shape)
         # print(np.array(viz_list2).shape)
-        Loss_viz(viz_list1, viz_list2, lr)
+        Loss_viz(viz_list1, viz_list2, lr, batch_size)
         viz_list1 = []
         viz_list2 = []
 
+    print(time.time()-start)
     print('Success! Congrats!')
 
