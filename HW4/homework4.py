@@ -26,6 +26,10 @@ class Linear_network(torch.nn.Module):
         self.linear2 = nn.Linear(hid_size, out_size)
         self.sigmoid = nn.Sigmoid()
 
+    def __repr__(self):
+        return '{}(hid_size={})'.format(self.__class__.__name__,
+                                        self.hid_size)
+
     def init_params(self):
         self.linear1.reset_parameters()
         self.linear2.reset_parameters()
@@ -53,7 +57,7 @@ def seed_all(seed):
     if not seed:
         seed = 0
 
-    log("[ Using Seed : ", seed, " ]")
+    print(f"Using random seed:{seed}")
 
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -62,10 +66,10 @@ def seed_all(seed):
     random.seed(seed)
 
 # visualize training process
-def Loss_viz(model, viz_list1, viz_list2):
+def Loss_viz(viz_list1, viz_list2, lr):
     epoch_list = list(range(1,num_epochs+1))
     model_list = ['model1 (h=3)', 'model2 (h=10)', 'model3 (h=25)', 'model4 (h=50)', 'model5 (h=100)']
-    plt.suptitle('Training results of models with different hid_size')
+
     plt.figure(figsize=(12, 6))
     plt.subplot(1,2,1)
     for i in range(5):
@@ -83,7 +87,8 @@ def Loss_viz(model, viz_list1, viz_list2):
     plt.legend(loc='upper right', labels=model_list)
     plt.title('Testset MSE error')
 
-    img = 'Linear network training results.png'
+    plt.suptitle('Training results of models with different hid_size (lr=' + str(lr) + ')')
+    img = 'Linear network training results(lr=' + str(lr) + ').png'
     plt.savefig(img)
     # plt.show()
 
@@ -169,7 +174,7 @@ def TriD_plot(dataset):
 loss = nn.MSELoss()
 # hid_list = [3,5,10,25,50]
 num_epochs = 50
-# lr_list = [0.01, 0.05, 0.1]
+lr_list = [0.01, 0.05, 0.1]
 train_loss_list = []
 test_loss_list = []
 viz_list1 = []
@@ -185,7 +190,7 @@ if __name__ == '__main__':
     # choose 30% origin data for testing
     testset = np.loadtxt('./hw4_test.txt', skiprows=0, delimiter=',')
 
-    TriD_plot(trainset+testset)
+    TriD_plot(np.array([*trainset, *testset]))
 
     train_data = torch.Tensor(trainset[:, 0:3])
     train_labels = torch.Tensor(trainset[:, 3]).reshape(-1, 1)
@@ -201,31 +206,36 @@ if __name__ == '__main__':
     model5 = Linear_network(3, 100, 1)
     model_list = [model1, model2, model3, model4, model5]
 
-    for model in model_list:
-        model.apply(init_params)
-        trainer = optim.SGD(model.parameters(), lr=0.03)
+    # Training models
+    for lr in lr_list:
+        for model in model_list:
+            model.apply(init_params)
+            trainer = optim.SGD(model.parameters(), lr=lr)
 
-        for epoch in range(num_epochs):
-            for x, y in data_iter:
-                l = loss(model(x), y)
-                trainer.zero_grad()
-                l.backward()
-                trainer.step()
-            # calculate loss
-            train_loss = loss(model(train_data), train_labels)
-            test_loss = loss(model(test_data), test_labels)
-            train_loss_list.append(train_loss.detach().numpy())
-            test_loss_list.append(test_loss.detach().numpy())
-            # print(np.array(train_loss_list).shape)
-        viz_list1.append(train_loss_list)
-        viz_list2.append(test_loss_list)
-        train_loss_list = []
-        test_loss_list = []
-        # print(f'epoch {epoch + 1}, loss {l:f}')
-    # print(loss_list)
-    print(np.array(viz_list1).shape)
-    print(np.array(viz_list2).shape)
-    Loss_viz(model1, viz_list1, viz_list2)
+            for epoch in range(num_epochs):
+                for x, y in data_iter:
+                    l = loss(model(x), y)
+                    trainer.zero_grad()
+                    l.backward()
+                    trainer.step()
+                # calculate loss
+                train_loss = loss(model(train_data), train_labels)
+                test_loss = loss(model(test_data), test_labels)
+                train_loss_list.append(train_loss.detach().numpy())
+                test_loss_list.append(test_loss.detach().numpy())
+                # print(np.array(train_loss_list).shape)
+            viz_list1.append(train_loss_list)
+            viz_list2.append(test_loss_list)
+            train_loss_list = []
+            test_loss_list = []
+            # print(f'epoch {epoch + 1}, loss {l:f}')
+        # print(loss_list)
+
+        # print(np.array(viz_list1).shape)
+        # print(np.array(viz_list2).shape)
+        Loss_viz(viz_list1, viz_list2, lr)
+        viz_list1 = []
+        viz_list2 = []
 
     print('Success! Congrats!')
 
